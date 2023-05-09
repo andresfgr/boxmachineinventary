@@ -14,10 +14,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 const CardbordPalletInventary = () => {
   const [validatedCreate, setValidatedCreate] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUseModal, setShowUseModal] = useState(false);
 
-  const handleCloseDeleteModal = () => setShowDeleteModal(false);
-  const handleShowDeleteModal = () => setShowDeleteModal(true);
+  const handleCloseUseModal = () => setShowUseModal(false);
+  const handleShowUseModal = () => setShowUseModal(true);
 
   const [data, setData] = useState([]);
 
@@ -26,9 +26,10 @@ const CardbordPalletInventary = () => {
   const [palletQuantity, setPalletQuantity] = useState("");
   const [provider, setProvider] = useState("");
 
-  const [deleteId, setDeleteId] = useState(0);
+  const [useId, setUseId] = useState(0);
 
-  const urlBase = "https://localhost:7150/api/CardbordPalletInventary/";
+  const urlBase =
+    "https://boxmachineinventary.azurewebsites.net/api/CardbordPalletInventary/";
 
   useEffect(() => {
     getData();
@@ -73,20 +74,20 @@ const CardbordPalletInventary = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    handleShowDeleteModal();
-    setDeleteId(id);
+  const handleUse = (id) => {
+    handleShowUseModal();
+    setUseId(id);
   };
 
-  const handleDeleteModal = () => {
+  const handleUseModal = () => {
     axios
-      .delete(urlBase + deleteId)
+      .delete(urlBase + useId)
       .then((result) => {
         if (result.status === 200) {
           clear();
           getData();
-          handleCloseDeleteModal();
-          toast.success("Item has been deleted.");
+          handleCloseUseModal();
+          toast.success("Item has been used.");
         }
       })
       .catch((error) => {
@@ -217,7 +218,7 @@ const CardbordPalletInventary = () => {
                       {item.usedDate === null ? (
                         <button
                           className="btn btn-primary"
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => handleUse(item.id)}
                         >
                           Use
                         </button>
@@ -236,9 +237,9 @@ const CardbordPalletInventary = () => {
           </tbody>
         </Table>
       </Container>
-      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
+      <Modal show={showUseModal} onHide={handleCloseUseModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Delete Item</Modal.Title>
+          <Modal.Title>Use Item</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Row>
@@ -248,10 +249,10 @@ const CardbordPalletInventary = () => {
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseDeleteModal}>
+          <Button variant="secondary" onClick={handleCloseUseModal}>
             Close
           </Button>
-          <Button variant="primary" type="submit" onClick={handleDeleteModal}>
+          <Button variant="primary" type="submit" onClick={handleUseModal}>
             Use
           </Button>
         </Modal.Footer>

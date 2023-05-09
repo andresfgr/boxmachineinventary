@@ -35,7 +35,7 @@ const BoxSizeComponent = () => {
 
   const [deleteId, setDeleteId] = useState(0);
 
-  const urlBase = "https://localhost:7150/api/BoxSize/";
+  const urlBase = "https://boxmachineinventary.azurewebsites.net/api/BoxSize/";
 
   useEffect(() => {
     getData();

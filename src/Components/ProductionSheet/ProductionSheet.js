@@ -30,8 +30,10 @@ const ProductionSheet = () => {
 
   const [singleSelections, setSingleSelections] = useState([]);
 
-  const urlBase = "https://localhost:7150/api/BoxMachineProductionSheet/";
-  const urlBaseBoxSize = "https://localhost:7150/api/BoxSize/";
+  const urlBase =
+    "https://boxmachineinventary.azurewebsites.net/api/BoxMachineProductionSheet/";
+  const urlBaseBoxSize =
+    "https://boxmachineinventary.azurewebsites.net/api/BoxSize/";
 
   useEffect(() => {
     getData();
