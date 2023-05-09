@@ -1,23 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+// import "./App.css";
+import NavigationBar from "./Components/NavigationBar/NavigationBar";
+import BoxSize from "./Components/BoxSize/BoxSize";
+import CardbordPalletInventary from "./Components/CardbordPalletInventary/CardbordPalletInventary";
+import ProductionSheet from "./Components/ProductionSheet/ProductionSheet";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        <NavigationBar />
+        <Routes>
+          <Route exact path="/" element={<ProductionSheet />} />
+          <Route
+            path="/CardbordPalletInventary"
+            element={<CardbordPalletInventary />}
+          />
+          <Route path="/BoxSize" element={<BoxSize />} />
+        </Routes>
+      </Router>
     </div>
   );
 }
