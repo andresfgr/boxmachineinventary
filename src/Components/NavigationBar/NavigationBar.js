@@ -1,12 +1,12 @@
 import { Nav, Navbar, NavLink } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import logo from "../../logo.png";
+// import logo from "../../logo.png";
 
 const NavigationBar = () => {
   return (
     <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark">
       &nbsp;&nbsp;&nbsp;
-      <Navbar.Toggle
+      {/* <Navbar.Toggle
         aria-controls="navbarScroll"
         data-bs-toggle="collapse"
         data-bs-target="#navbarScroll"
@@ -19,7 +19,7 @@ const NavigationBar = () => {
           height="30"
           className="d-inline-block align-top"
         />
-      </Navbar.Brand>
+      </Navbar.Brand> */}
       <Navbar.Collapse id="navbarScroll">
         <Nav>
           <NavLink eventKey="1" as={Link} to="/">

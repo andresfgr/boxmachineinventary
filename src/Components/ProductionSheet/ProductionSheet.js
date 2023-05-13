@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
-import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Container from "react-bootstrap/Container";
@@ -11,8 +10,18 @@ import axios from "axios";
 import Moment from "moment";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { ToastContainer, toast } from "react-toastify";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "react-bootstrap-typeahead/css/Typeahead.css";
+
+import {
+  DatatableWrapper,
+  Filter,
+  Pagination,
+  PaginationOptions,
+  TableBody,
+  TableHeader,
+} from "react-bs-datatable";
 
 const ProductionSheet = () => {
   const [validatedCreate, setValidatedCreate] = useState(false);
@@ -34,6 +43,42 @@ const ProductionSheet = () => {
     "https://boxmachineinventary.azurewebsites.net/api/BoxMachineProductionSheet/";
   const urlBaseBoxSize =
     "https://boxmachineinventary.azurewebsites.net/api/BoxSize/";
+
+  const headers = [
+    {
+      prop: "id",
+      title: "Id",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "boxSizeName",
+      title: "Box Size",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "producedQuantity",
+      title: "Produced Quantity",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "producedDate",
+      title: "Produced Date",
+      isSortable: true,
+      isFilterable: true,
+      cell: (row) => Moment(row.producedDate).format("DD MMM YYYY"),
+    },
+    {
+      prop: "button",
+      cell: (row) => (
+        <button className="btn btn-danger" onClick={() => handleDelete(row.id)}>
+          Delete
+        </button>
+      ),
+    },
+  ];
 
   useEffect(() => {
     getData();
@@ -176,43 +221,47 @@ const ProductionSheet = () => {
           </button>
         </Form>
         <br />
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Box Size</th>
-              <th>Produced Quantity</th>
-              <th>Produced Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data && data.length > 0 ? (
-              data.map((item, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{item.id}</td>
-                    <td>{item.boxSizeName}</td>
-                    <td>{item.producedQuantity}</td>
-                    <td>{Moment(item.producedDate).format("DD MMM YYYY")}</td>
-                    <td colSpan={2}>
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td>"Loading..."</td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+        <DatatableWrapper
+          body={data}
+          headers={headers}
+          alwaysShowPagination
+          paginationOptionsProps={{
+            initialState: {
+              rowsPerPage: 5,
+              options: [5, 10, 15, 20],
+            },
+          }}
+        >
+          <Row className="mb-4 p-2">
+            <Col
+              xs={12}
+              lg={4}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <Filter />
+            </Col>
+            <Col
+              xs={12}
+              sm={6}
+              lg={4}
+              className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
+            >
+              <PaginationOptions />
+            </Col>
+            <Col
+              xs={12}
+              sm={6}
+              lg={4}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <Pagination />
+            </Col>
+          </Row>
+          <Table>
+            <TableHeader />
+            <TableBody />
+          </Table>
+        </DatatableWrapper>
       </Container>
       <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
         <Modal.Header closeButton>

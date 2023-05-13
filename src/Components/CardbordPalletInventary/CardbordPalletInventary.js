@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
-import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Container from "react-bootstrap/Container";
@@ -10,7 +9,17 @@ import Form from "react-bootstrap/Form";
 import axios from "axios";
 import Moment from "moment";
 import { ToastContainer, toast } from "react-toastify";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
+
+import {
+  DatatableWrapper,
+  Filter,
+  Pagination,
+  PaginationOptions,
+  TableBody,
+  TableHeader,
+} from "react-bs-datatable";
 
 const CardbordPalletInventary = () => {
   const [validatedCreate, setValidatedCreate] = useState(false);
@@ -30,6 +39,68 @@ const CardbordPalletInventary = () => {
 
   const urlBase =
     "https://boxmachineinventary.azurewebsites.net/api/CardbordPalletInventary/";
+
+  const headers = [
+    {
+      prop: "id",
+      title: "Id",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "code",
+      title: "Code",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "size",
+      title: "Size",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "palletQuantity",
+      title: "Pallet Quantity",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "provider",
+      title: "Provider",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "EntryDate",
+      title: "Entry Date",
+      isSortable: true,
+      isFilterable: true,
+      cell: (row) =>
+        row.entryDate !== null
+          ? Moment(row.entryDate).format("DD MMM YYYY")
+          : "",
+    },
+    {
+      prop: "usedDate",
+      title: "Used Date",
+      isSortable: true,
+      isFilterable: true,
+      cell: (row) =>
+        row.usedDate !== null ? Moment(row.usedDate).format("DD MMM YYYY") : "",
+    },
+    {
+      prop: "button",
+      cell: (row) =>
+        row.usedDate === null ? (
+          <button className="btn btn-primary" onClick={() => handleUse(row.id)}>
+            Use
+          </button>
+        ) : (
+          ""
+        ),
+    },
+  ];
 
   useEffect(() => {
     getData();
@@ -176,66 +247,52 @@ const CardbordPalletInventary = () => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          <button className="btn btn-success" type="submit">
+          <Button className="btn btn-success" type="submit">
             Create
-          </button>
+          </Button>
         </Form>
         <br />
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Code</th>
-              <th>Size</th>
-              <th>Pallet Quantity</th>
-              <th>Provider</th>
-              <th>Entry Date</th>
-              <th>Used Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data && data.length > 0 ? (
-              data.map((item, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{item.id}</td>
-                    <td>{item.code}</td>
-                    <td>{item.size}</td>
-                    <td>{item.palletQuantity}</td>
-                    <td>{item.provider}</td>
-                    <td>
-                      {item.entryDate !== null
-                        ? Moment(item.entryDate).format("DD MMM YYYY")
-                        : ""}
-                    </td>
-                    <td>
-                      {item.usedDate !== null
-                        ? Moment(item.usedDate).format("DD MMM YYYY")
-                        : ""}
-                    </td>
-                    <td colSpan={2}>
-                      {item.usedDate === null ? (
-                        <button
-                          className="btn btn-primary"
-                          onClick={() => handleUse(item.id)}
-                        >
-                          Use
-                        </button>
-                      ) : (
-                        ""
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td>"Loading..."</td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+        <DatatableWrapper
+          body={data}
+          headers={headers}
+          alwaysShowPagination
+          paginationOptionsProps={{
+            initialState: {
+              rowsPerPage: 5,
+              options: [5, 10, 15, 20],
+            },
+          }}
+        >
+          <Row className="mb-4 p-2">
+            <Col
+              xs={12}
+              lg={4}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <Filter />
+            </Col>
+            <Col
+              xs={12}
+              sm={6}
+              lg={4}
+              className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
+            >
+              <PaginationOptions />
+            </Col>
+            <Col
+              xs={12}
+              sm={6}
+              lg={4}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <Pagination />
+            </Col>
+          </Row>
+          <Table id="jjj">
+            <TableHeader />
+            <TableBody />
+          </Table>
+        </DatatableWrapper>
       </Container>
       <Modal show={showUseModal} onHide={handleCloseUseModal}>
         <Modal.Header closeButton>

@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Modal from "react-bootstrap/Modal";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -9,9 +10,19 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 
-const BoxSizeComponent = () => {
+import {
+  DatatableWrapper,
+  Filter,
+  Pagination,
+  PaginationOptions,
+  TableBody,
+  TableHeader,
+} from "react-bs-datatable";
+
+const BoxSize = () => {
   const [validatedCreate, setValidatedCreate] = useState(false);
   const [validatedUpdate, setValidatedUpdate] = useState(false);
   const [show, setShow] = useState(false);
@@ -26,16 +37,54 @@ const BoxSizeComponent = () => {
 
   const [code, setCode] = useState("");
   const [detailDescription, setDetailDescription] = useState("");
-  // const [isActive, setIsActive] = useState(0);
 
   const [editId, setEditId] = useState(0);
   const [editCode, setEditCode] = useState("");
   const [editDetailDescription, setEditDetailDescription] = useState("");
-  // const [editIsActive, setEditIsActive] = useState(0);
 
   const [deleteId, setDeleteId] = useState(0);
 
   const urlBase = "https://boxmachineinventary.azurewebsites.net/api/BoxSize/";
+
+  const headers = [
+    {
+      prop: "id",
+      title: "Id",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "code",
+      title: "Code",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "detailDescription",
+      title: "Detail Description",
+      isSortable: true,
+      isFilterable: true,
+    },
+    {
+      prop: "button",
+      cell: (row) => (
+        <ButtonGroup aria-label="Basic example">
+          <Button
+            className="btn btn-primary"
+            onClick={() => handleEdit(row.id)}
+          >
+            Edit
+          </Button>
+          <Button
+            className="btn btn-danger"
+            onClick={() => handleDelete(row.id)}
+          >
+            Delete
+          </Button>
+        </ButtonGroup>
+      ),
+    },
+  ];
 
   useEffect(() => {
     getData();
@@ -59,7 +108,6 @@ const BoxSizeComponent = () => {
       .then((result) => {
         setEditCode(result.data.code);
         setEditDetailDescription(result.data.detailDescription);
-        // setEditIsActive(result.data.isActive);
         setEditId(result.data.id);
       })
       .catch((error) => {
@@ -79,7 +127,6 @@ const BoxSizeComponent = () => {
         id: editId,
         code: editCode,
         detailDescription: editDetailDescription,
-        // isActive: editIsActive,
       };
 
       axios
@@ -107,7 +154,6 @@ const BoxSizeComponent = () => {
       const data = {
         code: code,
         detailDescription: detailDescription,
-        // isActive: isActive,
       };
 
       axios
@@ -147,7 +193,6 @@ const BoxSizeComponent = () => {
   const clear = () => {
     setCode("");
     setDetailDescription("");
-    // setIsActive(0);
     setEditId(0);
     setEditCode("");
     setEditDetailDescription("");
@@ -193,53 +238,52 @@ const BoxSizeComponent = () => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          <button className="btn btn-success" type="submit">
+          <Button className="btn btn-success" type="submit">
             Create
-          </button>
+          </Button>
         </Form>
         <br />
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Code</th>
-              <th>Detail Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data && data.length > 0 ? (
-              data.map((item, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{item.id}</td>
-                    <td>{item.code}</td>
-                    <td>{item.detailDescription}</td>
-                    <td colSpan={2}>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handleEdit(item.id)}
-                      >
-                        Edit
-                      </button>{" "}
-                      &nbsp;
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td>"Loading..."</td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+        <DatatableWrapper
+          body={data}
+          headers={headers}
+          alwaysShowPagination
+          paginationOptionsProps={{
+            initialState: {
+              rowsPerPage: 5,
+              options: [5, 10, 15, 20],
+            },
+          }}
+        >
+          <Row className="mb-4 p-2">
+            <Col
+              xs={12}
+              lg={4}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <Filter />
+            </Col>
+            <Col
+              xs={12}
+              sm={6}
+              lg={4}
+              className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
+            >
+              <PaginationOptions />
+            </Col>
+            <Col
+              xs={12}
+              sm={6}
+              lg={4}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <Pagination />
+            </Col>
+          </Row>
+          <Table>
+            <TableHeader />
+            <TableBody />
+          </Table>
+        </DatatableWrapper>
       </Container>
       <Modal size="lg" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -335,4 +379,4 @@ const BoxSizeComponent = () => {
   );
 };
 
-export default BoxSizeComponent;
+export default BoxSize;
