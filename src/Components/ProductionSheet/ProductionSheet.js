@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, useRef } from "react";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
@@ -7,6 +7,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
+import { DownloadTableExcel } from "react-export-table-to-excel";
 import Moment from "moment";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { ToastContainer, toast } from "react-toastify";
@@ -43,6 +44,8 @@ const ProductionSheet = () => {
     "https://boxmachineinventary.azurewebsites.net/api/BoxMachineProductionSheet/";
   const urlBaseBoxSize =
     "https://boxmachineinventary.azurewebsites.net/api/BoxSize/";
+
+  const tableRef = useRef(null);
 
   const headers = [
     {
@@ -242,8 +245,22 @@ const ProductionSheet = () => {
             </Col>
             <Col
               xs={12}
-              sm={6}
-              lg={4}
+              sm={3}
+              lg={2}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <DownloadTableExcel
+                filename="Production Sheet Report"
+                sheet="Production Sheet"
+                currentTableRef={tableRef.current}
+              >
+                <Button className="btn btn-primary">Export Excel</Button>
+              </DownloadTableExcel>
+            </Col>
+            <Col
+              xs={12}
+              sm={3}
+              lg={2}
               className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
             >
               <PaginationOptions />
@@ -257,7 +274,7 @@ const ProductionSheet = () => {
               <Pagination />
             </Col>
           </Row>
-          <Table>
+          <Table ref={tableRef}>
             <TableHeader />
             <TableBody />
           </Table>

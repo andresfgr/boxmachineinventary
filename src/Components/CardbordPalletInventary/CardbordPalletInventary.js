@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, useRef } from "react";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
@@ -7,6 +7,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
+import { DownloadTableExcel } from "react-export-table-to-excel";
 import Moment from "moment";
 import { ToastContainer, toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -39,6 +40,8 @@ const CardbordPalletInventary = () => {
 
   const urlBase =
     "https://boxmachineinventary.azurewebsites.net/api/CardbordPalletInventary/";
+
+  const tableRef = useRef(null);
 
   const headers = [
     {
@@ -273,8 +276,22 @@ const CardbordPalletInventary = () => {
             </Col>
             <Col
               xs={12}
-              sm={6}
-              lg={4}
+              sm={3}
+              lg={2}
+              className="d-flex flex-col justify-content-end align-items-end"
+            >
+              <DownloadTableExcel
+                filename="Cardbord Pallet Inventary Report"
+                sheet="Cardbord Pallet Inventary"
+                currentTableRef={tableRef.current}
+              >
+                <Button className="btn btn-primary">Export Excel</Button>
+              </DownloadTableExcel>
+            </Col>
+            <Col
+              xs={12}
+              sm={3}
+              lg={2}
               className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
             >
               <PaginationOptions />
@@ -288,7 +305,7 @@ const CardbordPalletInventary = () => {
               <Pagination />
             </Col>
           </Row>
-          <Table id="jjj">
+          <Table ref={tableRef}>
             <TableHeader />
             <TableBody />
           </Table>
