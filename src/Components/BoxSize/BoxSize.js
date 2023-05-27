@@ -7,7 +7,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
-import axios from "axios";
+import axios from "../../axiosConfig"; // Ruta al archivo de configuración de Axios
 import { DownloadTableExcel } from "react-export-table-to-excel";
 import { ToastContainer, toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -23,6 +23,7 @@ import {
 } from "react-bs-datatable";
 
 const BoxSize = () => {
+  const [disable, setDisable] = useState(false);
   const [validatedCreate, setValidatedCreate] = useState(false);
   const [validatedUpdate, setValidatedUpdate] = useState(false);
   const [show, setShow] = useState(false);
@@ -43,8 +44,6 @@ const BoxSize = () => {
   const [editDetailDescription, setEditDetailDescription] = useState("");
 
   const [deleteId, setDeleteId] = useState(0);
-
-  const urlBase = "https://boxmachineinventary.azurewebsites.net/api/BoxSize/";
 
   const tableRef = useRef(null);
 
@@ -92,29 +91,51 @@ const BoxSize = () => {
     getData();
   }, []);
 
-  const getData = () => {
-    axios
-      .get(urlBase)
-      .then((result) => {
-        setData(result.data);
-      })
-      .catch((error) => {
-        toast.error(error);
-      });
+  const getData = async () => {
+    try {
+      axios
+        .get("/BoxSize/")
+        .then((result) => {
+          setData(result.data);
+        })
+        .catch((error) => {
+          toast.error(error);
+        });
+      // const response = await fetch(urlBase, {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //     // Otros encabezados si es necesario
+      //   }
+      // });
+
+      // if (response.ok) {
+      //   const data = await response.json();
+      //   setData(data);
+      // } else {
+      //   throw new Error('Error al obtener los datos');
+      // }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleEdit = (id) => {
+    const dataEdit = data.filter((item) => item.id === id);
+    setEditId(dataEdit[0].id);
+    setEditCode(dataEdit[0].code);
+    setEditDetailDescription(dataEdit[0].detailDescription);
     handleShow();
-    axios
-      .get(urlBase + id)
-      .then((result) => {
-        setEditCode(result.data.code);
-        setEditDetailDescription(result.data.detailDescription);
-        setEditId(result.data.id);
-      })
-      .catch((error) => {
-        toast.error(error);
-      });
+
+    // axios
+    //   .get("/BoxSize/" + id)
+    //   .then((result) => {
+    //     setEditCode(result.data.code);
+    //     setEditDetailDescription(result.data.detailDescription);
+    //     setEditId(result.data.id);
+    //   })
+    //   .catch((error) => {
+    //     toast.error(error);
+    //   });
   };
 
   const handleUpdate = (event) => {
@@ -124,22 +145,36 @@ const BoxSize = () => {
     if (form.checkValidity() === false) {
       setValidatedUpdate(true);
     } else {
+      setDisable(true);
       setValidatedUpdate(false);
-      const data = {
+      const dataEdit = {
         id: editId,
         code: editCode,
         detailDescription: editDetailDescription,
       };
 
       axios
-        .put(urlBase + `?id=${editId}`, data)
+        .put(`/BoxSize/?id=${editId}`, dataEdit)
         .then((result) => {
+          // console.log(result);
           clear();
-          getData();
+          setDisable(false);
+          setData((data) =>
+            data.map((item) =>
+              item.id === editId
+                ? {
+                    ...item,
+                    code: editCode,
+                    detailDescription: editDetailDescription,
+                  }
+                : item
+            )
+          );
           handleClose();
           toast.success("Item has been updated.");
         })
         .catch((error) => {
+          setDisable(false);
           toast.error(error);
         });
     }
@@ -152,6 +187,7 @@ const BoxSize = () => {
     if (form.checkValidity() === false) {
       setValidatedCreate(true);
     } else {
+      setDisable(true);
       setValidatedCreate(false);
       const data = {
         code: code,
@@ -159,35 +195,40 @@ const BoxSize = () => {
       };
 
       axios
-        .post(urlBase, data)
+        .post("/BoxSize/", data)
         .then((result) => {
+          setDisable(false);
           clear();
-          getData();
+          setData((current) => [...current, result.data]);
           toast.success("Item has been added.");
         })
         .catch((error) => {
+          setDisable(false);
           toast.error(error);
         });
     }
   };
 
   const handleDelete = (id) => {
-    handleShowDeleteModal();
     setDeleteId(id);
+    handleShowDeleteModal();
   };
 
   const handleDeleteModal = () => {
+    setDisable(true);
     axios
-      .delete(urlBase + deleteId)
+      .delete("/BoxSize/" + deleteId)
       .then((result) => {
         if (result.status === 200) {
           clear();
-          getData();
+          setDisable(false);
+          setData(data.filter((item) => item.id !== deleteId));
           handleCloseDeleteModal();
           toast.success("Item has been deleted.");
         }
       })
       .catch((error) => {
+        setDisable(false);
         toast.error(error);
       });
   };
@@ -240,7 +281,7 @@ const BoxSize = () => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          <Button className="btn btn-success" type="submit">
+          <Button disabled={disable} className="btn btn-success" type="submit">
             Create
           </Button>
         </Form>
@@ -361,7 +402,12 @@ const BoxSize = () => {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" type="submit" form="formModal1">
+          <Button
+            disabled={disable}
+            variant="primary"
+            type="submit"
+            form="formModal1"
+          >
             Save Changes
           </Button>
         </Modal.Footer>
@@ -382,6 +428,7 @@ const BoxSize = () => {
             Close
           </Button>
           <Button
+            disabled={disable}
             variant="primary"
             type="submit"
             onClick={handleDeleteModal}

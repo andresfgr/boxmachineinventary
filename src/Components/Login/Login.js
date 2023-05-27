@@ -24,86 +24,32 @@ const Login = () => {
     e.stopPropagation();
     if (form.checkValidity()) {
       setValidatedLogin(false);
-      //test
-      if ("customer" === userName && "1234" === password) {
-        sessionStorage.setItem("userName", userName);
-        sessionStorage.setItem("userRole", "admin");
-        navigate("/ProductionSheet");
-      } else {
-        toast.error("Please Enter valid credentials");
-      }
-      //end test
-
-      ///implentation
-      // console.log('proceed');
-      //   fetch("http://localhost:8000/user/" + userName)
-      //     .then((res) => {
-      //       return res.json();
-      //     })
-      //     .then((resp) => {
-      //       //console.log(resp)
-      //       if (Object.keys(resp).length === 0) {
-      //         toast.error("Please Enter valid userName");
-      //       } else {
-      //         if (resp.password === password) {
-      //           toast.success("Success");
-      //           sessionStorage.setItem("userName", userName);
-      //           sessionStorage.setItem("userRole", resp.role);
-      //           usenavigate("/ProductionSheet");
-      //         } else {
-      //           toast.error("Please Enter valid credentials");
-      //         }
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       toast.error("Login Failed due to :" + err.message);
-      //     });
+      let user = { userName: userName, password: password };
+      fetch(process.env.REACT_APP_API_BASE_URL + "/Auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(user),
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((resp) => {
+          if (resp.isAuthorized === false) {
+            toast.error(resp.message);
+          } else {
+            sessionStorage.setItem("userName", userName);
+            sessionStorage.setItem("token", resp.message);
+            navigate("/ProductionSheet");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Login Failed due to :" + err.message);
+        });
     } else {
       setValidatedLogin(true);
     }
   };
-
-  //   const ProceedLoginusingAPI = (e) => {
-  //     e.preventDefault();
-  //     if (validate()) {
-  //       ///implentation
-  //       // console.log('proceed');
-  //       let inputobj = { userName: userName, password: password };
-  //       fetch("https://localhost:44308/User/Authenticate", {
-  //         method: "POST",
-  //         headers: { "content-type": "application/json" },
-  //         body: JSON.stringify(inputobj),
-  //       })
-  //         .then((res) => {
-  //           return res.json();
-  //         })
-  //         .then((resp) => {
-  //           console.log(resp);
-  //           if (Object.keys(resp).length === 0) {
-  //             toast.error("Login failed, invalid credentials");
-  //           } else {
-  //             toast.success("Success");
-  //             sessionStorage.setItem("userName", userName);
-  //             sessionStorage.setItem("jwttoken", resp.jwtToken);
-  //             usenavigate("/");
-  //           }
-  //           // if (Object.keys(resp).length === 0) {
-  //           //     toast.error('Please Enter valid userName');
-  //           // } else {
-  //           //     if (resp.password === password) {
-  //           //         toast.success('Success');
-  //           //         sessionStorage.setItem('userName',userName);
-  //           //         usenavigate('/')
-  //           //     }else{
-  //           //         toast.error('Please Enter valid credentials');
-  //           //     }
-  //           // }
-  //         })
-  //         .catch((err) => {
-  //           toast.error("Login Failed due to :" + err.message);
-  //         });
-  //     }
-  //   };
 
   return (
     <div className="row">
@@ -121,7 +67,7 @@ const Login = () => {
             </div>
             <div className="card-body">
               <Row className="mb-3">
-                <Form.Group as={Col} controlId="validationCustom02">
+                <Form.Group as={Col} controlId="validationCustom01">
                   <Form.Label>User Name</Form.Label>
                   <Form.Control
                     type="text"

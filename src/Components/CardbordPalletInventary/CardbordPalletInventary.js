@@ -6,7 +6,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
-import axios from "axios";
+import axios from "../../axiosConfig"; // Ruta al archivo de configuración de Axios
 import { DownloadTableExcel } from "react-export-table-to-excel";
 import Moment from "moment";
 import { ToastContainer, toast } from "react-toastify";
@@ -23,6 +23,7 @@ import {
 } from "react-bs-datatable";
 
 const CardbordPalletInventary = () => {
+  const [disable, setDisable] = useState(false);
   const [validatedCreate, setValidatedCreate] = useState(false);
   const [showUseModal, setShowUseModal] = useState(false);
 
@@ -37,9 +38,6 @@ const CardbordPalletInventary = () => {
   const [provider, setProvider] = useState("");
 
   const [useId, setUseId] = useState(0);
-
-  const urlBase =
-    "https://boxmachineinventary.azurewebsites.net/api/CardbordPalletInventary/";
 
   const tableRef = useRef(null);
 
@@ -111,7 +109,7 @@ const CardbordPalletInventary = () => {
 
   const getData = () => {
     axios
-      .get(urlBase)
+      .get("/CardbordPalletInventary/")
       .then((result) => {
         setData(result.data);
       })
@@ -127,6 +125,7 @@ const CardbordPalletInventary = () => {
     if (form.checkValidity() === false) {
       setValidatedCreate(true);
     } else {
+      setDisable(true);
       setValidatedCreate(false);
       const data = {
         code: code,
@@ -136,13 +135,15 @@ const CardbordPalletInventary = () => {
       };
 
       axios
-        .post(urlBase, data)
+        .post("/CardbordPalletInventary/", data)
         .then((result) => {
           clear();
-          getData();
+          setDisable(false);
+          setData((current) => [...current, result.data]);
           toast.success("Item has been added.");
         })
         .catch((error) => {
+          setDisable(false);
           toast.error(error);
         });
     }
@@ -154,12 +155,14 @@ const CardbordPalletInventary = () => {
   };
 
   const handleUseModal = () => {
+    setDisable(true);
     axios
-      .delete(urlBase + useId)
+      .delete("/CardbordPalletInventary/" + useId)
       .then((result) => {
         if (result.status === 200) {
           clear();
           getData();
+          setDisable(false);
           handleCloseUseModal();
           toast.success("Item has been used.");
         }
@@ -250,7 +253,7 @@ const CardbordPalletInventary = () => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          <Button className="btn btn-success" type="submit">
+          <Button disabled={disable} className="btn btn-success" type="submit">
             Create
           </Button>
         </Form>
@@ -326,7 +329,12 @@ const CardbordPalletInventary = () => {
           <Button variant="secondary" onClick={handleCloseUseModal}>
             Close
           </Button>
-          <Button variant="primary" type="submit" onClick={handleUseModal}>
+          <Button
+            disabled={disable}
+            variant="primary"
+            type="submit"
+            onClick={handleUseModal}
+          >
             Use
           </Button>
         </Modal.Footer>

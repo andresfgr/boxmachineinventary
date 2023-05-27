@@ -6,7 +6,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
-import axios from "axios";
+import axios from "../../axiosConfig"; // Ruta al archivo de configuración de Axios
 import { DownloadTableExcel } from "react-export-table-to-excel";
 import Moment from "moment";
 import { Typeahead } from "react-bootstrap-typeahead";
@@ -25,6 +25,7 @@ import {
 } from "react-bs-datatable";
 
 const ProductionSheet = () => {
+  const [disable, setDisable] = useState(false);
   const [validatedCreate, setValidatedCreate] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const handleCloseDeleteModal = () => setShowDeleteModal(false);
@@ -39,11 +40,6 @@ const ProductionSheet = () => {
   const [deleteId, setDeleteId] = useState(0);
 
   const [singleSelections, setSingleSelections] = useState([]);
-
-  const urlBase =
-    "https://boxmachineinventary.azurewebsites.net/api/BoxMachineProductionSheet/";
-  const urlBaseBoxSize =
-    "https://boxmachineinventary.azurewebsites.net/api/BoxSize/";
 
   const tableRef = useRef(null);
 
@@ -90,7 +86,7 @@ const ProductionSheet = () => {
 
   const getData = () => {
     axios
-      .get(urlBase)
+      .get("/BoxMachineProductionSheet/")
       .then((result) => {
         setData(result.data);
       })
@@ -101,7 +97,7 @@ const ProductionSheet = () => {
 
   const getDataBoxSize = () => {
     axios
-      .get(urlBaseBoxSize)
+      .get("/BoxSize/")
       .then((result) => {
         const dataNew = result.data.map((item) => ({
           id: item.id,
@@ -121,6 +117,7 @@ const ProductionSheet = () => {
     if (form.checkValidity() === false) {
       setValidatedCreate(true);
     } else {
+      setDisable(true);
       setValidatedCreate(false);
       const data = {
         boxSizeId: boxSizeId,
@@ -128,13 +125,15 @@ const ProductionSheet = () => {
       };
 
       axios
-        .post(urlBase, data)
+        .post("/BoxMachineProductionSheet/", data)
         .then((result) => {
           clear();
           getData();
+          setDisable(false);
           toast.success("Item has been added.");
         })
         .catch((error) => {
+          setDisable(false);
           toast.error(error);
         });
     }
@@ -146,17 +145,20 @@ const ProductionSheet = () => {
   };
 
   const handleDeleteModal = () => {
+    setDisable(true);
     axios
-      .delete(urlBase + deleteId)
+      .delete("/BoxMachineProductionSheet/" + deleteId)
       .then((result) => {
         if (result.status === 200) {
           clear();
-          getData();
+          setDisable(false);
+          setData(data.filter((item) => item.id !== deleteId));
           handleCloseDeleteModal();
           toast.success("Item has been deleted.");
         }
       })
       .catch((error) => {
+        setDisable(false);
         toast.error(error);
       });
   };
@@ -219,7 +221,7 @@ const ProductionSheet = () => {
               </Form.Control.Feedback>
             </Form.Group>
           </Row>
-          <button className="btn btn-success" type="submit">
+          <button disabled={disable} className="btn btn-success" type="submit">
             Create
           </button>
         </Form>
@@ -296,6 +298,7 @@ const ProductionSheet = () => {
             Close
           </Button>
           <Button
+            disabled={disable}
             variant="primary"
             type="submit"
             onClick={handleDeleteModal}
